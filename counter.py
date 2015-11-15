@@ -1,4 +1,4 @@
-genome = ["A","T","G","C","A","A","T"]
+genome = ['A','T','G','C','A','A','T']
 counter = {'A':0,'T':0,'G':0,'C':0}
 
 for gene in genome:
