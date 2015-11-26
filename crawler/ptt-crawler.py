@@ -14,17 +14,26 @@ def crawlData():
     i += 1
 
 def getYear(x):
+    try:
+        soup.select('a')[x]['href']
+    except IndexError:
+        return '0001'
     yurl = 'https://www.ptt.cc' + str(soup.select('a')[x]['href'])
     yres = requests.get(yurl)
-    ysoup = BeautifulSoup(yres.text)
-    return ysoup.select('.article-meta-value')[3].text
-            
-indexNum=700
-while indexNum <= 700:
-#while True:
+    ysoup = BeautifulSoup(yres.text,"lxml")
+    try:
+        return ysoup.select('.article-meta-value')[3].text
+    except IndexError:
+        return '0000'
+    
+        
+    
+indexNum=1175
+#while indexNum <= 1180:
+while True:
     url = 'https://www.ptt.cc/bbs/Yunlin/index' + str(indexNum) + '.html'
     res = requests.get(url)
-    soup = BeautifulSoup(res.text)
+    soup = BeautifulSoup(res.text,"lxml")
     if ifExist(res.status_code):
         print(res.url)
         crawlData()
