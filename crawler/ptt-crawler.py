@@ -1,5 +1,6 @@
-import requests
+import requests, psycopg2, time
 from bs4 import BeautifulSoup
+from datetime import datetime
 
 def ifExist(pageStatus):
     if pageStatus == 200 or pageStatus != 500:
@@ -13,7 +14,9 @@ def crawlData():
               soup.select('.author')[i].text.strip() + ',' + 
               soup.select('.title')[i].text.strip() + ',' +
               crawl_another_page(i+10)[1])
-        print(data.split(',')[::])
+        print(datetime.strptime(data.split(',')[0] + ' ' + data.split(',')[1], '%Y/%m/%d %H:%M:%S'),
+             data.split(',')[3], data.split(',')[4], time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
+    
     i += 1
 
 def crawl_another_page(x):
@@ -24,10 +27,39 @@ def crawl_another_page(x):
         try:
             return [ysoup.select('.article-meta-value')[3].text, yres.url]
         except IndexError:
-            return ['00:00:00 0000', yres.url]
-            
+            return ['00:00:00 9000', yres.url]
+
+def connectdb():
+    conn = psycopg2.connect(user='lab')
+    cur = conn.cursor()
+
+    cur.execute('''drop table if exists ptt_crawler''')
+
+    cur.execute('''
+        create table ubike (
+            when_ts       timestamp,
+            where_pt      point,
+            code          varchar(8),
+            name          varchar(32),
+            area_name     varchar(32),
+            space_num     int,
+            avg_bike_num  real,
+            max_bike_num  int,
+            min_bike_num  int,
+            bike_num_std  real,
+            avg_space_num real,
+            max_space_num int,
+            min_space_num int,
+            space_num_std real
+        )
+    ''')
+    cur.execute('''create index on ubike (when_ts)''')
+    cur.execute('''create index on ubike (code)''')
+    cur.execute('''create index on ubike (name)''')
+    cur.execute('''create index on ubike using gist (where_pt)''')
+
 indexNum=1
-while indexNum <= 200:
+while indexNum <= 1:
 #while True:
     url = 'https://www.ptt.cc/bbs/Yunlin/index' + str(indexNum) + '.html'
     res = requests.get(url)
@@ -40,4 +72,3 @@ while indexNum <= 200:
         print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
         print(res.url,'並不存在!')
         break
-    
