@@ -12,7 +12,7 @@ def get_indexPage(board, indexNum):
             print('使用者中斷!')
             break
         except:
-            print('連線失敗, 2秒後重試 ...')
+            print('連線失敗, 2秒後重試 ... ' + requests.get(index_url, verify=False).url)
             time.sleep(2)
             return requests.get(index_url, verify=False)
         retry_counter += 1
@@ -37,7 +37,7 @@ def crawl_timestamp(record):
             print('使用者中斷!')
             break
         except:
-            print('時間資料載入失敗, 2秒後重試 ...')
+            print('時間資料載入失敗, 2秒後重試 ... ' + ts_url)
             time.sleep(2)
             ts_res = requests.get(ts_url, verify=False)
     ts_soup = BeautifulSoup(ts_res.text, 'lxml')
@@ -51,28 +51,28 @@ conn = psycopg2.connect(host='postgres',
                         database='web_crawler')
 cur = conn.cursor()
 
-cur.execute("drop table if exists ptt2")
-cur.execute('''
-            create table ptt2 (
-                                post_ts  timestamp,
-                                author   varchar(20),
-                                title    varchar(50),
-                                url      varchar(60),
-                                board    varchar(20),
-                                indexNum varchar(5)
-                                );
-            ''')
-cur.execute('''create index on ptt (post_ts)''')
-cur.execute('''create index on ptt (title)''')
-cur.execute('''create index on ptt (url)''')
+#cur.execute("drop table if exists ptt2")
+#cur.execute('''
+#            create table ptt2 (
+#                                post_ts  timestamp,
+#                                author   varchar(20),
+#                                title    varchar(50),
+#                                url      varchar(60),
+#                                board    varchar(20),
+#                                indexNum varchar(5)
+#                                );
+#            ''')
+#cur.execute('''create index on ptt (post_ts)''')
+#cur.execute('''create index on ptt (title)''')
+#cur.execute('''create index on ptt (url)''')
 
 #===================================================================================================
 
-indexNum = 1
+indexNum = 161
 #while indexNum <= 1:
 while True:
     try:
-        board = 'Yunlin'
+        board = 'Lifeismoney'
         soup = BeautifulSoup(get_indexPage(board, indexNum).text, 'lxml')
     except:
         continue
@@ -81,43 +81,51 @@ while True:
         try:
             crawl_timestamp(record)
         except:
+            print('此筆紀錄沒有時間資料, 跳過')
             continue
-        
+
         dataset = (crawl_timestamp(record) +'``'+ 
-                   crawl_data(record) + '``' +
-                   board + '``' +
-                   str(indexNum)
-                  ).split('``')
-        
+                    crawl_data(record) + '``' +
+                    board + '``' +
+                    str(indexNum)
+                    ).split('``')
+
+        try:
+            datetime.strptime(dataset[0], '%b %d %H:%M:%S %Y')
+        except:
+            continue
+
         cur.execute('''
-                    insert into ptt2 values(
-                    %s,
-                    %s,
-                    %s,
-                    %s,
-                    %s,
-                    %s
-                    )
-                    ''',
-                    (
-                    # timestamp
-                    datetime.strptime(dataset[0], '%b %d %H:%M:%S %Y'),
-                    # author
-                    dataset[1],
-                    # title
-                    dataset[2],
-                    # url
-                    dataset[3],
-                    # board
-                    dataset[4],
-                    # indexNum
-                    dataset[5]
-                    )
+        insert into ptt2 values(
+                                %s,
+                                %s,
+                                %s,
+                                %s,
+                                %s,
+                                %s
+                                )
+        ''',
+        (
+                                # timestamp
+                                datetime.strptime(dataset[0], '%b %d %H:%M:%S %Y'),
+                                # author
+                                dataset[1],
+                                # title
+                                dataset[2],
+                                # url
+                                dataset[3],
+                                # board
+                                dataset[4],
+                                # indexNum
+                                dataset[5]
+                                )
         )    
         conn.commit()
+
     print('已匯入 ' + 'https://www.ptt.cc/bbs/' + board + '/index' + str(indexNum) + '.html')
     indexNum += 1
-conn.close()   
-print('Nothing More...')
+
+conn.close()
+print('沒有更多可讀取的資料...')
     
 #datetime.strptime(crawl_timestamp(record), '%b %d %H:%M:%S %Y')
