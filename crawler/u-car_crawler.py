@@ -63,7 +63,7 @@ def crawl_thread(link):
             # author
             i.find_all("li", {'class':'member_id'})[0].select('a')[0].string.strip(),
             # title
-            t1_soup.find_all("div", { "class" : "forumhead" })[0].text.strip(),
+            thread_soup.find_all("div", { "class" : "forumhead" })[0].text.strip(),
             # content
             i.find_all('div', {'class':'userwrite'})[0].text.strip()
         ])
@@ -75,7 +75,7 @@ while True:
         for link in sorted(get_linklist(get_soup(pageNum))):
             with open('u-car.csv', 'a', encoding='utf-8') as csvfile:
                 for data in crawl_thread(link):
-                    print(data[0],data[1],data[2],link)
+                    print(data[0],data[1],data[2],data[3],link)
                     writer = csv.writer(csvfile, delimiter=',')
                     writer.writerow([data[0],data[1],data[2],data[3],link])
         pageNum += 1
