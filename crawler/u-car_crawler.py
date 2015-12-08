@@ -54,6 +54,7 @@ def crawl_thread(link):
     thread_res.encoding = 'utf-8'
     thread_soup = BeautifulSoup(thread_res.text)
     
+    
     thread_data = []
     for i in thread_soup.find_all("div", { "class" : "fd_cont" }):
         thread_data.append([
@@ -61,6 +62,8 @@ def crawl_thread(link):
             i.find_all("div", {"class":"memberinfo_top_l"})[0].text[:19].strip(),
             # author
             i.find_all("li", {'class':'member_id'})[0].select('a')[0].string.strip(),
+            # title
+            t1_soup.find_all("div", { "class" : "forumhead" })[0].text.strip(),
             # content
             i.find_all('div', {'class':'userwrite'})[0].text.strip()
         ])
@@ -74,7 +77,7 @@ while True:
                 for data in crawl_thread(link):
                     print(data[0],data[1],data[2],link)
                     writer = csv.writer(csvfile, delimiter=',')
-                    writer.writerow([data[0],data[1],data[2],link])
+                    writer.writerow([data[0],data[1],data[2],data[3],link])
         pageNum += 1
     except:
         RetryCounter = 1
