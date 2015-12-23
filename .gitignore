@@ -1,2 +1,9 @@
 *.csv
 *.json
+*.vector
+*.model
+*.txt
+*.bz2
+*.gz
+*.tgz
+*.zip
