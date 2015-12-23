@@ -1,9 +1,11 @@
+!autohome_word_only.vector
+!autohome_count.csv
 *.csv
 *.json
-*.vector
 *.model
 *.txt
 *.bz2
 *.gz
 *.tgz
 *.zip
+*.vector
