@@ -21,7 +21,7 @@ def pseg_adj_n(row):
     dataset = [adj, n]
     return dataset
 
-csv_reader = csv.reader(open('mobile01-luxgen-2013-15.csv'))
+csv_reader = csv.reader(open('mobile01-luxgen-2013-15_uniq.csv'))
 nounlist = []
 with open('mobile01-luxgen-2013-15_with_adj_n.csv', 'w') as csvfile:
     textwriter = csv.writer(csvfile, delimiter=',')
