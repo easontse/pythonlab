@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
-import requests, time, csv
+import requests, time, csv, os, sys, logging
 from bs4 import BeautifulSoup
 
 def httpGet(url):
-    time.sleep(2)
-    print('HTTP GET: ' + url)
+    time.sleep(2.2)
+    logger.info('HTTP GET: ' + url)
     return requests.get(url)
 
 def get_linklist(url):
-    print('Generating Linklist on: ' + url)
+    logger.info('Generating Linklist on: ' + url)
     
     soup = BeautifulSoup(httpGet(url).text,'lxml')    
     
@@ -34,15 +34,16 @@ def get_linklist(url):
         if '主題' not in i and i not in linklist:
             linklist.append(i.a['href'])
     
-    print('Links in the list: ' + str(len(linklist)))
+    logger.info('Links in the list: ' + str(len(linklist)))
     return linklist
 
 def crawl_content(url):
-    print('Crawling Content on: ' + url)
+    logger.info('Crawling Content on: ' + url)
     res = httpGet(url)
     
     if url != res.url:
-        return None
+        logger.warning('Requested URL does not match Response URL, return None!')
+        return []
     
     soup = BeautifulSoup(res.text,'lxml')
     
@@ -68,20 +69,32 @@ def crawl_content(url):
     return dataset
 
 #--------------------------------------------------------------------------------
-pageNum = 1
+
+program = os.path.basename(sys.argv[0])
+logger = logging.getLogger(program)
+
+logging.basicConfig(filename='mobile01-luxgen.log',level=logging.INFO,format='%(asctime)s: %(levelname)s: %(message)s')
+logging.root.setLevel(level=logging.INFO)
+logger.info("running %s" % ' '.join(sys.argv))
+ 
+pageNum = 66
 while True:
 
     url = 'http://www.mobile01.com/topiclist.php?f=444&p=' + str(pageNum)
-    print('Start Crawling on: ' + url)
+    logger.info('Start Crawling on: ' + url + '\n')
     
     if url != httpGet(url).url:
-        print('Requested URL does not match Response URL, QUIT!')
+        logger.error('Requested URL does not match Response URL, QUIT!')
         break
     
     for i in get_linklist(url):
         with open('mobile01-luxgen.csv', 'a') as outfile:
             writer = csv.writer(outfile)
             for x in crawl_content('http://www.mobile01.com/'+i):
-                writer.writerow([x[0],x[1],x[2],x[3],x[4]])
-    print('Done on: ' + url)
+                if len(x) > 0:
+                    writer.writerow([x[0],x[1],x[2],x[3],x[4]])
+                else:
+                    logger.warning('None received, skipped!')
+                    
+    logger.info('Finished: ' + url + '\n')
     pageNum += 1
