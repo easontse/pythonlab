@@ -3,8 +3,8 @@
 import json, csv
 import gensim
 
-model = gensim.models.Word2Vec.load_word2vec_format('mobile01-luxgen-2013-15.vector',binary=False)
-autohome_count = csv.reader(open('mobile01-luxgen-2013-15_count.csv', 'r'))
+model = gensim.models.Word2Vec.load_word2vec_format('mobile01-luxgen-2013-15_uniq.vector',binary=False)
+autohome_count = csv.reader(open('mobile01-luxgen-2013-15_uniq_count.csv', 'r'))
 
 target_words = ['車','人','U6','問題','價格','油耗']
 
@@ -36,5 +36,5 @@ dataset = {
 
 print(json.dumps(dataset, indent=2, ensure_ascii=False))
     
-with open('mobile01-luxgen-2013-15_linked_data.json','w') as outfile:
+with open('mobile01-luxgen-2013-15_uniq_linkedData.json','w') as outfile:
     outfile.write(json.dumps(dataset, outfile, indent=2, ensure_ascii=False))

@@ -21,11 +21,11 @@ def pseg_adj_n(row):
     dataset = [adj, n]
     return dataset
 
-csv_reader = csv.reader(open('mobile01-luxgen-2013-15_uniq.csv'))
+csv_reader = csv.reader(open('mobile01-luxgen-2013-15_uniq_corrected.csv'))
 nounlist = []
-with open('mobile01-luxgen-2013-15_with_adj_n.csv', 'w') as csvfile:
+with open('mobile01-luxgen-2013-15_uniq_with_adj_n.csv', 'w') as csvfile:
     textwriter = csv.writer(csvfile, delimiter=',')
-    for row in tqdm(csv_reader):
+    for row in tqdm(csv_reader, total=102874, mininterval=0.5):
         pseg_result = pseg_adj_n(row)
         
         textwriter.writerow([
@@ -46,5 +46,5 @@ for i in nounlist:
 
 noun_series = pd.Series(nounlist_unpack)
 
-with open('mobile01-luxgen-2013-15_count.csv', 'w') as csvfile:
+with open('mobile01-luxgen-2013-15_uniq_count.csv', 'w') as csvfile:
     noun_series.value_counts().to_csv(csvfile)

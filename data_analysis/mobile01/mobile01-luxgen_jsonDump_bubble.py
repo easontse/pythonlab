@@ -3,8 +3,8 @@
 import json, csv
 import gensim
 
-model = gensim.models.Word2Vec.load_word2vec_format('mobile01-luxgen-2013-15.vector',binary=False)
-autohome_count = csv.reader(open('mobile01-luxgen-2013-15_count.csv', 'r'))
+model = gensim.models.Word2Vec.load_word2vec_format('mobile01-luxgen-2013-15_uniq.vector',binary=False)
+autohome_count = csv.reader(open('mobile01-luxgen-2013-15_uniq_count.csv', 'r'))
 
 target_words = ['車','人','U6','問題','價格','油耗']
 
@@ -19,7 +19,7 @@ for i in related_words:
 
 count_dict = {row[0]:int(row[1]) for row in autohome_count if row[0] in related_words_unpack}
 
-with open('mobile01-luxgen-2013-15_with_adj_n.csv','r') as raw_data:
+with open('mobile01-luxgen-2013-15_uniq_with_adj_n.csv','r') as raw_data:
     csv_reader = csv.reader(raw_data)
     a = []
     for row in csv_reader:
@@ -45,5 +45,5 @@ for i in target_words:
 
 print(json.dumps(dataset, indent=4, ensure_ascii=False))
     
-with open('mobile01-luxgen.json','w') as outfile:
+with open('mobile01-luxgen-2013-15_uniq_bubble.json','w') as outfile:
     outfile.write(json.dumps(dataset, outfile, indent=4, ensure_ascii=False))
