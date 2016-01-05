@@ -32,14 +32,15 @@ with open('mobile01-luxgen-2013-15_uniq_with_adj_n.csv','r') as raw_data:
 dict_list= {word:{x:y for _,x,y in [i for i in a if i[0] == word][:5]} for word in related_words_unpack}
 
 dataset = []
-for i in tqdm(target_words, mininterval=1):
+for i in target_words:
     dataset.append(
         {'name':i,
          'children': [{'topic':x,
                        'rate':int(count_dict[x]*0.6), 
                        'link':[
                                 {'title':y,
-                                 'url':dict_list[x][y]} for y in dict_list[x]
+                                 'url':dict_list[x][y]
+                                } for y in dict_list[x]
                               ]
                       } for x,_ in model.most_similar(i)[0:5]
                      ]
