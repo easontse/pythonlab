@@ -2,6 +2,7 @@
 
 import json, csv
 import gensim
+from tqdm import tqdm
 
 model = gensim.models.Word2Vec.load_word2vec_format('mobile01-luxgen-2013-15_uniq.vector',binary=False)
 autohome_count = csv.reader(open('mobile01-luxgen-2013-15_uniq_count.csv', 'r'))
@@ -17,29 +18,31 @@ for i in related_words:
     for x in i:
         related_words_unpack.append(x)
 
-count_dict = {row[0]:int(row[1]) for row in autohome_count if row[0] in related_words_unpack}
+count_dict = {row[0]:int(row[1]) for row in tqdm(autohome_count) if row[0] in related_words_unpack}
 
 with open('mobile01-luxgen-2013-15_uniq_with_adj_n.csv','r') as raw_data:
     csv_reader = csv.reader(raw_data)
     a = []
-    for row in csv_reader:
+    for row in tqdm(csv_reader):
         for word in related_words_unpack:
-            if word in row[5] and [word, row[2]] not in a:
-                a.append([word, row[2]])
+            if word in row[5] and [word, row[2], row[6]] not in a:
+                a.append([word, row[2], row[6]])
 
-dict_list= {word:[i[1] for i in a if i[0] == word][:5] for word in related_words_unpack}
+#dict_list= {word:[i[1] for i in a if i[0] == word][:5] for word in related_words_unpack}
+dict_list= {word:{x:y for _,x,y in [i for i in a if i[0] == word][:5]} for word in related_words_unpack}
 
 dataset = []
-for i in target_words:
+for i in tqdm(target_words, mininterval=1):
     dataset.append(
         {'name':i,
          'children': [{'topic':x,
-                       'rate':count_dict[x], 
+                       'rate':int(count_dict[x]*0.6), 
                        'link':[
-                                {'title':y,'url':'https://www.google.ca/?gws_rd=ssl'} 
-                                for y in dict_list[x]
+                                {'title':y,
+                                 'url':dict_list[x][y]} for y in dict_list[x]
                               ]
-                      } for x,_ in model.most_similar(i)[0:5]]
+                      } for x,_ in model.most_similar(i)[0:5]
+                     ]
         }
     )
 
